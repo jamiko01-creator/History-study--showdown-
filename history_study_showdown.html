@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>History Study Showdown</title>
+<style>
+:root{--ink:#172033;--muted:#657087;--line:#dbe2ef;--blue:#304db4;--green:#168653;--bg:#f4f7fc;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:800px;margin:auto;padding:20px}.hero{padding:28px;border-radius:20px;background:linear-gradient(135deg,#283c86,#45a247);color:white;margin-bottom:18px}
+.hero .eyebrow{font-size:12px;font-weight:800;letter-spacing:2px}.hero h1{font-size:clamp(27px,6vw,40px);line-height:1.1;margin:10px 0}.hero p{margin-bottom:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:14px 0;box-shadow:0 3px 14px #17203308}
+h2{margin:0 0 12px;font-size:23px}button,input{font:inherit}button{cursor:pointer;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;color:var(--ink);font-weight:650;text-align:left}
+button:focus-visible,input:focus-visible{outline:3px solid #89a4ff;outline-offset:2px}button:disabled{cursor:default}
+button:hover:not(:disabled){border-color:var(--blue)}.primary{background:var(--blue);color:white;border-color:var(--blue);text-align:center;width:100%;margin-top:12px}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.mode{min-height:82px}.mode small{display:block;color:var(--muted);font-weight:400;margin-top:4px}
+input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;margin:6px 0 14px;background:white;color:var(--ink)}
+.muted{color:var(--muted)}.meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.pill{font-size:12px;font-weight:800;background:#eef2ff;padding:5px 10px;border-radius:99px}.track{height:8px;border-radius:99px;background:#e3e8f1;overflow:hidden;margin:12px 0 18px}.fill{height:100%;background:#36a269;width:0;transition:width .2s}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.stat{padding:12px;border-radius:12px;background:#f2f5fb}.stat small{display:block;color:var(--muted)}.stat strong{font-size:25px}
+#answers{display:grid;gap:9px}.answer{width:100%;line-height:1.4}.answer.correct{border:2px solid var(--green);background:#effaf4}.answer.wrong{border:2px solid #d14b4b;background:#fff3f3}
+.feedback{padding:13px;border-radius:12px;background:#f2f5fb;margin-top:14px}.hidden{display:none!important}.score-row{padding:14px;border:1px solid var(--line);border-radius:12px;margin:8px 0}.score-big{font-size:27px;font-weight:850}.review-item{padding:13px 0;border-bottom:1px solid var(--line)}.review-item:last-child{border:0}
+footer{text-align:center;font-size:13px;color:var(--muted);padding:15px}
+@media(max-width:480px){main{padding:12px}.hero{padding:22px}.card{padding:16px}}
+</style>
+</head>
+<body>
+<main>
+<section class="hero"><div class="eyebrow">LEARN • COMPETE • WIN</div><h1>📚 History Study Showdown</h1><p>25 events. 25 questions. Study history while playing!</p></section>
+<section id="setup" class="card">
+<h2>Ready to play?</h2><p class="muted">Choose a game mode. Every correct answer earns 10 points. Read the explanation after each question.</p>
+<div class="modes">
+<button class="mode" id="solo">🧑‍🎓 Solo Study<small>Try to beat your own score</small></button>
+<button class="mode" id="teams">👥 Team Battle<small>Two teams take turns</small></button>
+</div>
+<label for="names"><b>Player or team names (optional)</b></label>
+<input id="names" placeholder="Example: Tigers and Eagles">
+<p class="muted">For Team Battle, enter two names separated by “and”. If you leave it blank, the teams will be Team 1 and Team 2.</p>
+</section>
+<section id="game" class="card hidden">
+<div class="meta"><span id="round" class="pill"></span><span id="turn" class="pill"></span></div>
+<div class="track"><div id="progress" class="fill"></div></div>
+<div class="stats"><div class="stat"><small>🏆 SCORE</small><strong id="score">0</strong></div><div class="stat"><small>🔥 CORRECT</small><strong id="correctCount">0 / 0</strong></div></div>
+<div class="muted" id="eventInfo"></div><h2 id="question"></h2><div id="answers"></div>
+<div id="feedback" class="feedback hidden" aria-live="polite"></div>
+<button id="next" class="primary hidden">Next Question →</button>
+</section>
+<section id="results" class="card hidden">
+<h2 style="text-align:center">🏆 Game Complete!</h2><p id="summary" style="text-align:center"></p><div id="finalScores"></div>
+<h2 style="margin-top:24px">📖 Review the events</h2><div id="review"></div>
+<button id="replay" class="primary">🔄 Play Again</button>
+</section>
+<footer>Made for classroom practice • History Study Showdown</footer>
+</main>
+<script>
+const questions=[
+{y:1635,e:"Boston Latin School is founded",q:"Why was Boston Latin School important?",a:["It was one of the first schools in colonial America.","It was the first online school.","It made college free for everyone."],c:0,x:"Founded in Boston, it helped establish formal schooling in colonial America."},
+{y:1647,e:"Massachusetts passes the Old Deluder Satan Act",q:"Why did this law matter?",a:["It ended all school lessons.","It required certain towns to provide schooling.","It created public universities nationwide."],c:1,x:"The law required certain towns to establish schools, helping expand education."},
+{y:1779,e:"Thomas Jefferson proposes an education plan",q:"What was Jefferson's main idea?",a:["Only wealthy children should learn.","Schools should teach only farming.","Education should be available to more children, although his plan was limited."],c:2,x:"Jefferson argued for broader education, but his proposal did not create equal access for everyone."},
+{y:1837,e:"Horace Mann leads Massachusetts education reform",q:"Why is Horace Mann remembered?",a:["He helped improve public schools and teacher training.","He invented the internet.","He banned textbooks."],c:0,x:"Mann promoted public education, trained teachers, and better school systems."},
+{y:1837,e:"Cheyney University begins as an institute for Black students",q:"Why was this school important?",a:["It was a school only for presidents.","It helped expand educational opportunities for Black students.","It replaced every high school."],c:1,x:"The institution later became Cheyney University, a historically Black university."},
+{y:1852,e:"Massachusetts passes a compulsory school attendance law",q:"What did compulsory attendance mean?",a:["Students could never take summer break.","Only adults had to attend school.","Children were required by law to attend school."],c:2,x:"The law helped make school attendance a legal responsibility for children."},
+{y:1867,e:"The U.S. Department of Education is first established",q:"Why was a federal education department created?",a:["To collect information and help improve schools.","To run every classroom directly.","To replace all state governments."],c:0,x:"It gathered information about schools to help improve education across the country."},
+{y:1896,e:"Plessy v. Ferguson supports segregation",q:"How did this Supreme Court decision affect education?",a:["It immediately integrated all schools.","It supported segregation under the idea of 'separate but equal.'","It made college free."],c:1,x:"The ruling supported segregation, which kept many Black students in unequal schools."},
+{y:1900,e:"School attendance expands in the United States",q:"Why did more children attending school matter?",a:["It ended all exams.","It stopped schools from hiring teachers.","More children gained chances to learn reading, writing, and math."],c:2,x:"Growing school attendance helped make basic education more common."},
+{y:1917,e:"Smith-Hughes Act funds vocational education",q:"What kind of learning did this law support?",a:["Job skills and career training.","Only music lessons.","Only online classes."],c:0,x:"It supported vocational education, including agriculture, trades, and home economics."},
+{y:1920,e:"School attendance laws become widespread",q:"Why were attendance laws important?",a:["They closed public schools.","They helped make education a regular part of childhood.","They removed all school subjects."],c:1,x:"Compulsory attendance laws helped ensure children spent time in school."},
+{y:1935,e:"Federal programs support education during the Great Depression",q:"Why did government support matter during this period?",a:["It stopped students from reading.","It ended every school district.","It helped communities and students during a difficult economic time."],c:2,x:"Economic hardship made support for schools and students especially important."},
+{y:1954,e:"Brown v. Board of Education",q:"Why was this Supreme Court ruling important?",a:["It ruled racial segregation in public schools unconstitutional.","It created the first computer.","It required students to wear uniforms."],c:0,x:"The decision rejected racial segregation in public schools."},
+{y:1958,e:"National Defense Education Act",q:"What did this act encourage schools to improve?",a:["Only sports.","Science, math, languages, and other education areas.","Only school lunches."],c:1,x:"During the Cold War, the law supported subjects considered important to national security."},
+{y:1964,e:"Civil Rights Act",q:"How did the Civil Rights Act affect education?",a:["It ended every school test.","It made every school private.","It prohibited discrimination in programs covered by the law."],c:2,x:"The act strengthened efforts to fight discrimination, including in education."},
+{y:1965,e:"Elementary and Secondary Education Act",q:"Why did this law matter?",a:["It provided federal support for schools, especially students in low-income communities.","It removed public school funding.","It ended elementary school."],c:0,x:"The law increased federal help for K–12 education and disadvantaged students."},
+{y:1972,e:"Title IX becomes law",q:"What does Title IX help protect?",a:["Only students who play football.","Equal opportunity regardless of sex in federally funded education programs.","Only college professors."],c:1,x:"Title IX protects against sex discrimination in covered education programs."},
+{y:1975,e:"Education for All Handicapped Children Act",q:"Why was this law important?",a:["It banned students with disabilities from school.","It removed classroom support.","It expanded the right to public education and services for children with disabilities."],c:2,x:"The law, later renamed IDEA, helped protect educational rights for students with disabilities."},
+{y:1983,e:"A Nation at Risk report",q:"Why did this report get attention?",a:["It warned about problems in U.S. education and called for improvements.","It invented homework.","It closed every public school."],c:0,x:"The report helped spark national debates about school quality and standards."},
+{y:1990,e:"Americans with Disabilities Act",q:"How did the ADA help students?",a:["It made school optional.","It strengthened protections against disability discrimination, including in many educational settings.","It removed accessibility rules."],c:1,x:"The ADA improved accessibility and protections for people with disabilities."},
+{y:1996,e:"Internet use grows in schools",q:"Why was internet access a major change?",a:["It made teachers unnecessary.","It ended books instantly.","It gave students new ways to research and find information."],c:2,x:"The internet gradually expanded access to information and digital learning."},
+{y:2001,e:"No Child Left Behind Act",q:"What did this law emphasize?",a:["Testing and measuring student progress in schools.","Ending all reading classes.","Replacing teachers with computers."],c:0,x:"The law increased testing and school accountability requirements."},
+{y:2009,e:"Common Core State Standards initiative",q:"What was the goal of Common Core?",a:["Use one textbook for every subject.","Set shared learning goals in math and English language arts.","End state education systems."],c:1,x:"The standards aimed to set common expectations for what students should learn."},
+{y:2020,e:"COVID-19 shifts many schools to remote learning",q:"Why was this a major turning point?",a:["It ended education permanently.","It made every student learn outdoors.","Many students and teachers had to use online learning tools from home."],c:2,x:"The pandemic rapidly expanded remote learning and revealed differences in technology access."},
+{y:2022,e:"ChatGPT becomes publicly available",q:"Why did ChatGPT matter for education?",a:["It introduced a widely accessible AI tool that raised new questions about learning and schoolwork.","It replaced all schools.","It made all information automatically correct."],c:0,x:"AI tools created new ways to study while raising questions about accuracy, originality, and responsible use."}
+];
+const $=id=>document.getElementById(id);let mode="solo",names=["Player 1","Player 2"],turn=0,index=0,scores=[0,0],correct=[0,0],answered=0,locked=false;
+function show(id){$(id).classList.remove("hidden")}function hide(id){$(id).classList.add("hidden")}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function start(m){mode=m;let entered=$("names").value.trim();if(m==="teams"){let split=entered.split(/\s+and\s+/i);names=split.length>=2?[split[0].trim(),split[1].trim()]:["Team 1","Team 2"]}else names=[entered||"Player 1","Player 2"];index=0;turn=0;scores=[0,0];correct=[0,0];answered=0;hide("setup");hide("results");show("game");render()}
+function render(){let q=questions[index];$("round").textContent=`QUESTION ${index+1} / ${questions.length}`;$("turn").textContent=mode==="solo"?"SOLO STUDY":`${names[turn]}'S TURN`;$("progress").style.width=`${index/questions.length*100}%`;$("score").textContent=scores[0]+(mode==="teams"?` – ${scores[1]}`:"");$("correctCount").textContent=correct[0]+(mode==="teams"?` – ${correct[1]}`:"")+` / ${answered}`;$("eventInfo").textContent=`${q.y} • ${q.e}`;$("question").textContent=q.q;$("answers").innerHTML="";hide("feedback");hide("next");locked=false;
+shuffle(q.a.map((v,i)=>({v,i}))).forEach((item,k)=>{let b=document.createElement("button");b.className="answer";b.textContent=String.fromCharCode(65+k)+". "+item.v;b.addEventListener("click",()=>answer(item.i,b));$("answers").appendChild(b)})}
+function answer(choice,btn){if(locked)return;locked=true;answered++;let q=questions[index],ok=choice===q.c;if(ok){scores[turn]+=10;correct[turn]++}Array.from($("answers").children).forEach(b=>{b.disabled=true;let answerText=b.textContent.slice(3);if(answerText===q.a[q.c])b.classList.add("correct")});if(!ok)btn.classList.add("wrong");$("feedback").innerHTML=`<b>${ok?"✅ Correct! +10 points":"❌ Not quite!"}</b><p>${q.x}</p>`;show("feedback");$("score").textContent=scores[0]+(mode==="teams"?` – ${scores[1]}`:"");$("correctCount").textContent=correct[0]+(mode==="teams"?` – ${correct[1]}`:"")+` / ${answered}`;$("next").textContent=index===questions.length-1?"See Final Scores 🏆":"Next Question →";show("next")}
+function next(){if(!locked)return;if(index===questions.length-1){finish();return}index++;if(mode==="teams")turn=1-turn;render()}
+function finish(){hide("game");show("results");let total=questions.length*10;if(mode==="teams"){$("summary").textContent=scores[0]===scores[1]?"It's a tie! Great studying by both teams!":`${names[scores[0]>scores[1]?0:1]} wins the Study Showdown!`;$("finalScores").innerHTML=names.map((n,i)=>`<div class="score-row"><b>${escapeHtml(n)}</b><div class="score-big">${scores[i]} points</div><span class="muted">${correct[i]} correct answers</span></div>`).join("")}else{$("summary").textContent=`You earned ${scores[0]} out of ${total} possible points (${Math.round(scores[0]/total*100)}%). `+(scores[0]>=200?"Awesome work!":scores[0]>=130?"Good job! Review the events below.":"Keep practicing! Read the explanations below to improve.");$("finalScores").innerHTML=`<div class="score-row"><b>Final score</b><div class="score-big">${scores[0]} / ${total}</div><span class="muted">${correct[0]} out of 25 questions correct</span></div>`}$("review").innerHTML=questions.map(q=>`<div class="review-item"><b>${q.y} — ${q.e}</b><p class="muted">${q.x}</p></div>`).join("");window.scrollTo({top:0,behavior:"smooth"})}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+$("solo").addEventListener("click",()=>start("solo"));$("teams").addEventListener("click",()=>start("teams"));$("next").addEventListener("click",next);$("replay").addEventListener("click",()=>{hide("results");show("setup");window.scrollTo({top:0,behavior:"smooth"})});
+</script>
+</body>
+</html>
